@@ -6,11 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Storage;
+
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+
 use App\Models\Project;
+
 use App\Models\Type;
+
 use App\Models\Technology;
+
+use Illuminate\Support\Facades\Mail;
+use App\Models\Lead;
+use App\Mail\ConfirmProject;
 
 class ProjectController extends Controller
 {
@@ -63,6 +71,14 @@ class ProjectController extends Controller
         if($request->has('technologies'))
             $newProject->technologies()->attach($request->technologies);
         
+        $newLead = new Lead();
+        $newLead->title = $data['title'];
+        $newLead->slug = $data['slug'];
+        $newLead->description = $data['description'];
+
+        $newLead->save();
+
+        Mail::to('info@laravel.mail.com')->send(new ConfirmProject($newLead));
 
         return redirect()->route('admin.projects.index')->with('message', 'il progetto è stato creato');
     }
